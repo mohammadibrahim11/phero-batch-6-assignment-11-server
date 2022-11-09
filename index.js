@@ -47,13 +47,34 @@ async function run() {
       res.send(serviceDetails);
     });
 
+    // app.get('/reviews', async(req,res)=>{
+    //   console.log(req.query.service);
+    //   let query = {};
+    //   if(req.query.service){
+    //     query={
+    //       service:req.query.service
+    //     }
+    //   }
+    //   const cursor = reviewsCollection.find(query);
+    //   const review = await cursor.toArray();
+    //   res.send(review);
+    // })
+
+    app.get('/reviews/:id',async(req,res)=>{
+      console.log(req.params.id);
+      const cursor = reviewsCollection.find({service: req.params.id})
+      const reviews = await cursor.toArray()
+      res.json(reviews)
+    })
+
 
     app.post('/reviews', async(req,res)=>{
       const review = req.body;
       const result = await reviewsCollection.insertOne(review);
       res.send(result);
     })
-  } finally {
+  } 
+  finally {
   }
 }
 run().catch((error) => console.log(error));
