@@ -68,5 +68,5 @@ app.get("/", (req, res) => {
   res.send("simple node server running");
 });
 app.listen(port, () => {
-  console.log("node server running on 5000");
+  console.log("node server is running on 5000");
 });
