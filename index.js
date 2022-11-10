@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const jwt =require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 
@@ -9,6 +10,13 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(cors());
 app.use(express.json());
+
+app.post('/jwt',(req,res)=>{
+  const user = req.body;
+  console.log(user);
+  const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'7d'})
+  res.send({token})
+})
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.gbplfqy.mongodb.net/?retryWrites=true&w=majority`;
 console.log(uri);
