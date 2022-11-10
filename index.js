@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const jwt =require('jsonwebtoken');
+// const jwt =require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 
@@ -11,12 +11,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-app.post('/jwt',(req,res)=>{
-  const user = req.body;
-  console.log(user);
-  const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'7d'})
-  res.send({token})
-})
+
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.gbplfqy.mongodb.net/?retryWrites=true&w=majority`;
 console.log(uri);
@@ -26,12 +21,41 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+//  function verifyJWT(req,res,next) {
+//   const authHeader =req.headers.authorization;
+//   if(!authHeader){
+//   return  res.status(401).send({message: 'unauthorized access'});
+//   }
+//   const token = authHeader.split(' ')[1];
+//   jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,function(error,decoded){
+//     if(error){
+//     return  res.status(403).send(
+//         {message:'unauthrized access'}) 
+//          }
+//        req.decoded = decoded
+//          next();
+//   })
+//   // next()
+  
+// }
+
 async function run() {
  
   try {
 
     const serviceCollection = client.db("cleaningService").collection("services");
     const reviewsCollection = client.db('cleaningService').collection('reviews');
+    
+
+    // app.post('/jwt',(req,res)=>{
+    //   const user = req.body;
+    //   console.log(user);
+    //   const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'5s'})
+    //   res.send({token})
+    // })
+
+
+
 
     app.get("/services", async (req, res) => {
       const query = {};
@@ -39,6 +63,12 @@ async function run() {
       const services = await cursor.toArray();
       res.send(services);
     });
+
+    app.post('/services', async(req,res)=>{
+      const service = req.body;
+      const result = await serviceCollection.insertOne(service)
+      res.send(result);
+    })
 
     app.get("/servicesHome", async (req, res) => {
       const query = {};
@@ -55,8 +85,20 @@ async function run() {
       res.send(serviceDetails);
     });
 
+    // app.post('/jwt',(req,res)=>{
+    //   const user = req.body;
+    //   const token=jwt.sign(user,process.env.ACCESS_TOKEN_SECRET, {expiresIn:'1h'});
+    //   res.send({token});
+    // })
+
     app.get('/reviews', async(req,res)=>{
-      console.log(req.query.email);
+     
+    //  const  decoded = req.decoded ;
+    //   console.log('inside api',decoded);
+    //   if(decoded.email !== req.query.email){
+    //     res.status(403).send({message:'forbidden access'})
+    //   }
+
       let query = {};
       if(req.query.email){
         query={
@@ -79,6 +121,13 @@ async function run() {
     app.post('/reviews', async(req,res)=>{
       const review = req.body;
       const result = await reviewsCollection.insertOne(review);
+      res.send(result);
+    });
+
+    app.delete('/reviews/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id:ObjectId(id)};
+      const result = await reviewsCollection.deleteOne(query);
       res.send(result);
     })
   } 
