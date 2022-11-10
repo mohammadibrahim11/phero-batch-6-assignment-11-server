@@ -64,6 +64,13 @@ async function run() {
       res.send(services);
     });
 
+    app.get('/services', async(req,res)=>{
+    const query = {};
+    const cursor = serviceCollection.find(query).sort({'_id': -01});
+    const services=await cursor.toArray();
+    res.send(services);
+    })
+
     app.post('/services', async(req,res)=>{
       const service = req.body;
       const result = await serviceCollection.insertOne(service)
@@ -124,12 +131,32 @@ async function run() {
       res.send(result);
     });
 
+    app.patch('/reviews/:id',async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id : ObjectId(id)};
+      const reviews = req.body;
+      const option = {upsert:true};
+      const updateReview ={
+        $set : {
+          name:reviews.nmae,
+          text : reviews.text,
+          photoUrl: reviews.photoUrl,
+        }
+      }
+      const result = await reviewsCollection.updateOne(filter,updateReview,option);
+      console.log(result);
+      res.send(result)
+
+    })
+
     app.delete('/reviews/:id',async(req,res)=>{
       const id = req.params.id;
       const query = {_id:ObjectId(id)};
       const result = await reviewsCollection.deleteOne(query);
       res.send(result);
     })
+
+
   } 
   finally {
   }
